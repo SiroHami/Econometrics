@@ -376,3 +376,87 @@ println("matpord: \n$matpord\n")
 
 #---------------------------------------------------------------#
 #1.2.4 Objects in DataFrames.jl
+
+using Pkg
+Pkg.add("DataFrames")
+using DataFrames
+
+#defien a Dataframe:
+icecream_sales = [30, 40, 35, 130, 120, 60]
+weather_coded = [0, 1, 0, 1, 1, 0]
+customers = [2000, 2100, 1500, 8000, 7200, 2000]
+df = DataFrame(
+        icecream_sales = icecream_sales,
+        weather_coded = weather_coded,
+        customers = customers
+        )
+
+#print the DataFrame:
+println("df: \n $df\n")
+
+#access columns by variable reference:
+sybset1 = df[!, [:icecream_sales, :customers]]
+println("sybset1: \n $sybset1\n")
+
+#access second to fourth row:
+subset2 = df[2:4, :]
+println("subset2: \n $subset2\n")
+
+#access rows and columns by variable integer positins:
+subset3 = df[2:4, 1:2]
+
+#access rows by variable integer positions:
+subset4 = df[2:4, [:icecream_sales, :weather_coded]]
+println("subset4: \n $subset4\n")
+
+#Important DataFrames Functions
+#first(df, i) : First i observations in df
+#last(df, i) : Last i observations in df
+#decribe(df) : Print descriptive statistics in df
+#ncol(df) : Number of variables in df
+#nrow(df) : Number of observations in df
+#names(df) : Variable names in df
+#df.x or df[!, :x] : Access x in df
+#df[i, j] : Access variables and observations in df by integer positions
+#push!(df, row) : Add one observation at the end of df in-place
+#vcat(df, df2) : Bind two data frames df and df2 vertically if variable names matyching
+#deleteat!(df, i) : Delete row i in data frame df in-place
+#sort(df, :x) : Sort data in df by variable x in ascending ortder
+#subset(df, :x => ByRow(condition)) : Extract rows in df, which match the provided condition in variable xy
+#grooupby(df, :x) : Create subgroups of df according to x in a grouped data frame
+#combine(gdf, :x => function) : Apply a function to variable x in a grouped data frame gdf
+using Pkg
+Pkg.add("CategoricalArrays")
+Pkg.add("Statistics")
+
+using DataFrames, CategoricalArrays, Statistics
+
+#define a DataFrames:
+icecream_sales = [30, 40, 35, 130, 120, 60]
+weather_coded = [0, 1, 0, 1, 1, 0]
+customers = [2000, 2100, 1500, 8000, 7200, 2000]
+df = DataFrame(
+        icecream_sales = icecream_sales,
+        weather_coded = weather_coded,
+        customers = customers
+        )
+
+#get som descriptive statistics:
+descr_stats = describe(df)
+println("descr_stats: \n $descr_stats\n")
+
+# add one observations with more than 2500 customers:
+subset_df = subset(df, :customers => ByRow(>(2500)))
+println("subset_df: \n $subset_df\n")
+
+#use a CategoricalArray object to attach labbels (0 = "bad"; 1 = > "good")
+df.weather = recode(df[!, :weather_coded], 0 => "bad", 1 => "good")
+println("df: \n $df\n")
+
+#mean sales for each weather category by
+#grouping and splitting data:
+grouped_data = groupby(df, :weather)
+#apply the mean to icecream_sales and combine the results:
+group_means = combine(grouped_data, :icecream_sales => mean)
+println("group_means: \n $group_means\n")       
+
