@@ -600,3 +600,41 @@ savefig("JlGraphs/Graphs-Basics-c.pdf")
 
 #---------------------------------------------------------------#
 #1.4.2 Customizing Graphs with Options
+# The width of the liens cna be changed usiyng the argument linewidth
+# The size of the marker symbols can be charged using the argument markersize (default markersize=4)
+# The transparency of a line can be charged by the argument linealpha with a number betwwen 0 (complete transparnecy) and 1 (no transparency)
+# The color of the lines and symbols can be changed using the argument color (also see linecolor, markercolor etc. for more flexibility)
+# A title cna be added using title!("My Title")
+# The horizontal and vertical axis cna be labeled using xlabel!("My x axis label") and ylabel!("my y axis label")
+# The limits of the horizontal and the vertical axis can be chosen using xlims!(min, max) and ylims!(min, max) respectively
+
+#---------------------------------------------------------------#
+#1.4.3 Overlaying Several Plots
+
+#support for all normal densities:
+x = range(-4, 4, length=100)
+# get different density evaluations:
+y1 = pdf.(Normal(), x)
+y2 = pdf.(Normal(1, 0.5), x)
+y3 = pdf.(Normal(0, 2), x)
+
+#plot
+plot(x, y1, linestyle=:solid, color=:balck, label="standard normal")
+plot!(x, y2, linestyle=:dash, color=:black,
+linealpha=0.6, label= "mu =1, sigma = 0.5")
+plot!(x, y3, linestyle=:dot, color=:black,
+linalpha-0.3, label"mu = 0, sigma = 2")
+xlims!(-3, 4)
+title!("Normal Densities")
+ylabel!("phi(x)")
+xlabel!("x")
+savefig("JlGraphs/Graphs-Overlaying-a.pdf")
+
+#Here are more example
+#hline!([y]) : adds a horizontal line at y
+#vline!([x]) : adds a vertical line at x
+#legend=position : adds the legend at a specific position, which can be :topleft, :top, :topright, :left, :inside, :right, :bottomleft, or :bottomright.
+#size = (width, height) : sets the width and height of your graph(the default is (600, 400))
+
+#---------------------------------------------------------------#
+#1.4.4 Exproting a file
