@@ -458,5 +458,145 @@ println("df: \n $df\n")
 grouped_data = groupby(df, :weather)
 #apply the mean to icecream_sales and combine the results:
 group_means = combine(grouped_data, :icecream_sales => mean)
-println("group_means: \n $group_means\n")       
+println("group_means: \n $group_means\n")
 
+#---------------------------------------------------------------#
+#1.2.5 Using PyCall.jl
+using Pkg
+Pkg.add("Conda")
+
+using Conda
+Conda.add("packagename")
+
+#define a block of Python Code:
+py"""
+import numpy as np
+
+#define array in numpy:
+mat1 = np.array(([4, 9, 8],
+[2, 6, 3]))
+
+mat2 = np.array(([1, 5, 2],
+[6, 6, 0],
+[4, 8, 3]))
+
+#matix algebra
+matprod_py = mat1 @ mat2
+"""
+
+#automatic type conversion from Python to Julia:
+matprod = py"matprod_py"
+matprod_type = typeof(matprod)
+println("matprod_type: $matprod_type\n")
+println("matprod: \n$matprod\n")
+
+
+#---------------------------------------------------------------#
+#---------------------------------------------------------------#
+#1.3 External Data
+#1.3.1 Data Sets in the Examples
+using Pkg
+Pkg.add("WooldridgeDatasets")
+using WooldridgeDatasets, DataFrames
+
+#load data:
+wage1 = DataFrame(wooldridge("wage1"))
+
+#get type:
+type_wage1 = typeof(wage1)
+println("type_wage1: $type_wage1\n")
+
+#get first four ovservations and fort eight variables:
+preview_wage1 = wage1[1:4, 1:8]
+println("preview_wage1: \n$preview_wage1\n")
+
+#---------------------------------------------------------------#
+#1.3.2 Imprt and Export of Data Files
+Pkg.add("CSV")
+using CSV
+
+#import a .CSV file with CSV .read:
+df1 = CSV.read("data/sales.csv", DataFrame, delim=",",
+        header=["year", "product1", "product2", "product3"])
+println("df1: \n $df1\n")
+
+#import a .txt file with CSV.read:
+df2 = CSV.read("data/sales.txt", DataFrame, delim=" ")
+println("df2: \n $df2\n")
+
+#add a row to df1:
+push!(df1, [2014, 10, 8, 2])
+println("df1: \n $df1\n")
+
+#export with CSV.write:
+CSV.write("data/sales2.csv", df1)
+
+#The most important arguments of CSV.read and CSV.write are:
+#header: Integer specifying the variable names or a vector of variable names
+#delim: Often columns are separated by a comma, i.e. delim=','. Instead, an arbitrary other character can be given. sep=';'
+#skipto: Integer specifying the first row to import( and skipping all previous ones)
+
+#---------------------------------------------------------------#
+#1.3.3 Data from other Sources
+Pkg.add("Dates")
+Pkg.add("MarketData")
+using Dates, MarketData
+
+#download data for "F" (Ford) and defien start and end:
+ticker = "F"
+start_date = DateTime(2007, 12, 31)
+end_date = DateTime(2017, 01, 01)
+
+#import data as DataFrame:
+F_data = DataFrame(yahoo(ticker, YahooOpt(period1=start_date, period2=end_date)))
+
+preview_F_data = first(F_data, 5)
+println("preview_F_data: \n $preview_F_data\n")
+
+
+#---------------------------------------------------------------#
+#---------------------------------------------------------------#
+#1.4 Base Graphics with Plots.jl
+#1.4.1 Basic Graphs
+Pkg.add("Plots")
+using Plots
+
+#when you encounter Error: Could not load library "libGR.dll" 
+Pkg.update()
+ENV["GRDIR"]=""
+Pkg.build("GR")
+
+#create data:
+x = [1, 3, 4, 7, 8, 9]
+y = [0, 3, 6, 9, 7, 8]
+
+#plot and save:
+plot(x, y, color=:black)
+savefig("JlGraphs/Graphs-Basics-a.pdf")
+
+#scatter and save:
+scatter(x, y, color=:black, markershape=:dtriangle, legend=false)
+savefig("JlGraphs/Graphs-Basics-b.pdf")
+
+Pkg.add("Distributions")
+using Distributions
+
+#support of quadratic function
+# (creates an array with 100 equispaced elemnts from -3 to 2):
+x1 = range(start= -3, stop=2, length=100)
+#furnction values for all these values:
+y1 = x1.^2
+
+#plot quadratic function
+plot(x1, y1, linestyle=:solid, color=:black, legend=false)
+
+#same for normal density:
+x2 = range(-4, 4, length=100)
+y2 = pdf.(Normal(), x2)
+
+#plot nortmal density
+plot(x2, y2, linestyle=:solid, color=:black, legned=false)
+savefig("JlGraphs/Graphs-Basics-c.pdf")
+
+#---------------------------------------------------------------#
+#1.4.2 Customizing Graphs with Options
