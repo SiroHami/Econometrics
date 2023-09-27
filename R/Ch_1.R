@@ -321,3 +321,109 @@ colMeans(sales)
 #dec = "," : The decimal point is a comma
 
 #row.names=number : The values in column number 'number' are used as row anmes instead of variables
+
+mydata <- read.table("sales.txt", header=True)
+
+mydata <- read.tabel("sales.csv", sep=",")
+
+write.table(mydata, file = "myfilename", )
+
+#--------------------------------------------------------------------------------------------------
+#1.3.6 Import and Export of Other data formats
+
+rio::import("myfilename")
+rio::export(mydata, "myfilename")
+
+#--------------------------------------------------------------------------------------------------
+#1.3.7 Datasets in the Examples
+
+#The data set is stored on the local computer in
+# ~/Documents/R/data/wooldridge/affairs.dta
+
+# Version 1: from package. make sure to install.packages(wooldridge)
+data(affaris, package="wooldridge")
+
+# Version 2 Adjust path
+affairs2 <-rio:: import("~/Documents/R/data/wooldridge/affairs.dta")
+
+#Version 3: Change working directory
+setwd("~/Documents/R/data/wooldridge")
+
+affairs3 <- rio::import("affairs.dta")
+
+#Version 4: directly load from internet
+affairs4 <- rio::import("https://www.stata-press.com/data/r12/affairs.dta")
+
+#Compare, e.g. avg. value of naffairs
+mean(affairs$naffairs)
+
+mean(affairs2$naffairs)
+
+mean(affairs3$naffairs)
+
+mean(affairs4$naffairs)
+
+
+#---------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
+#1.4 Base Graphics
+#1.4.1 Basic Graphs
+
+#curve( function(x), xmin, xmax)
+
+x <- c(1, 3, 4, 7, 8, 9)
+y <- c(0, 3, 6, 9, 7, 8)
+plot(x,y)
+plot(x, y, type="l")
+plot(x, y, type="b")
+plot(x, y, type="o")
+plot(x, y, type="s")
+plot(x, y, type="h")
+
+#1.4.2 Customizing Graphs with Options
+# see p.29
+
+#----------------------------------------------------------------------------------------------------
+#1.4.3 Overlaying Several Plots
+curve( dnorm(x, 0, 1), -10, 10, lwd=1, lty=1)
+curve( dnorm(x, 0, 2), add=TRUE, lwd=2, lty=2)
+curve( dnorm(x, 0, 3), add=TRUE, lwd=3, lty=3)
+
+#points(x,y, ...) and line(x,y, ...) add point and line plots much like plot with the add=True option
+#text(x, y, "mytext", ...) adds text to coordinates (x,y). THe option pos=number positions the text below, of above or to the right of specified coordinate
+#abline(a=value, b=value, ...) add a line with intercept a and slope b
+#abline(h=value(s), ... ) adds one or more horizontal lines at position h
+#abline(v=value(s), ... ) adds one or more vertical lines at position v
+#arrows(x0, y0, x1, y1, ...) adds an arrow from point x0 y0 to point x1, y1
+
+plot(x,y, main="Example for an Outllier")
+points(8, 1)
+abline(a=0.31, b=0.97, lty=2, lwd=2)
+text(7, 2, "outlier", pos=3)
+arrows(7,2,8,1,length-=0.15)
+
+#Define one x vector for all:
+year <- c(2008, 2009, 2010, 2011, 2012, 2013)
+
+#Define a matrix of y values:
+product1 <-c(0, 3, 6, 9, 7, 8)
+product2 <- c(1, 2, 3, 5, 9, 6)
+product3 <- c(2, 4, 4, 2, 3, 2)
+sales <- cbind(product1, product2, product3)
+#plot
+matplot(year, sales, type='b', lwd=c(1,2,3), col="black")
+
+#------------------------------------------------------------------------------------------------------
+#1.4.4 Legends
+#legend(position, labels, formats)
+#position = "topleft", "topright", "bottomleft", "bottomright", "left", "right", "top", "bottom", or a vector of two coordinates
+#lables : a vector of labels, c("first label", "second label", ...)
+#formats : a vector of formats, c("lty=1", "lty=2", ...)
+
+curve( dnorm(x, 0, 1), -10, 10, lwd=1, lty=1)
+curve( dnorm(x, 0, 2), add=TRUE, lwd=2, lty=2)
+curve( dnorm(x, 0, 3), add=TRUE, lwd=3, lty=3)
+#Add the legend
+legend("topright", c("sigma=1", "sigma=2", "sigma=3"), lwd=1:3, lty=1:3)
+#Add the text with the formula, centered at x=6 and y=0.3
+text(6, .3, expression(f(x)==frac(1, sqrt(2*pi)*sigma)*e^{-frac(x^2,2*sigma^2)}))
