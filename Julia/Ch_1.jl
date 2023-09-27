@@ -638,3 +638,16 @@ savefig("JlGraphs/Graphs-Overlaying-a.pdf")
 
 #---------------------------------------------------------------#
 #1.4.4 Exproting a file
+#savefig("filepath/filename.format")
+using Plots, Distributions
+#supprot for all normal densities:
+x = range(-4, 4, length=100)
+#get different density evaluations:
+y1 = pdf.(Normal(), x)
+y2 = pdf.(Normal(0, 3), x)
+
+#plot(a):
+plot(legned=false, size=(400, 600))
+plot!(x, y1, linestyle=:solid, color=:black)
+plot!(x, y2, linestyle=:dash, color=:black, linealpha=0.3)
+savefig("JlGraphs/Graphs-Export-a.pdf")
