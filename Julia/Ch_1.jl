@@ -651,3 +651,98 @@ plot(legned=false, size=(400, 600))
 plot!(x, y1, linestyle=:solid, color=:black)
 plot!(x, y2, linestyle=:dash, color=:black, linealpha=0.3)
 savefig("JlGraphs/Graphs-Export-a.pdf")
+
+
+#---------------------------------------------------------------#
+#---------------------------------------------------------------#
+#1.5 Descriptive Statistics
+#1.5.1 Discrete Distribution: Frequencies and Contigency Tables
+#combine(groupby(df, :x), nrow) or freqtable(df.x)
+
+#For getting the sample shares intead of the counts we can use the comman proptable:(df.y)
+#The overall sample share: proptable(df.x, df.y)
+#The share within x values (row percentages): proptable(df.x, df.y, margins=1)
+#The share within y values (column percentages): proptable(df.x, df.y, margins=2)
+#kids = 1 if the repondent has at least one child
+#ratemarr = Rating of the own marriage(1= verry unhappy, ..., 5=very happy)
+
+using Pkg
+Pkg.add("CategoricalArrays")
+Pkg.add("FreqTables")
+
+using WooldridgeDatasets, DataFrames, CategoricalArrays, FreqTables
+affairs = DataFrame(wooldridge("affairs"))
+#attarch labels to kids and convert it to categorical variable:
+affairs.haskids = categorical(
+        recode(affairs.kids, 0 => "no", 1 => "yes")
+)
+
+# ...a and ratemarr (for example: 1 = "very unhappy", ..., 5 = "very happy")
+affairs.marriage = categorical(
+        recode(affairs.ratemarr,
+        1 => "very unhappy",
+        2 => "unhappy",
+        3 => "average",
+        4 => "happy",
+        5 => "very happy"
+        )
+)
+
+#frequency table (alphabetical order of elements):
+ft_marriage = freqtable(affairs.marriage)
+println("ft_marriage: \n $ft_marriage\n")
+
+#frequncy table with groupby:
+ft_groupby = combine(
+        groupby(affairs, :haskids),
+        nrow
+)
+println("ft_groupby: \n $ft_groupby\n")
+
+#contingency tables with absolute and relative values:
+ct_all_abs = freqtable(affairs.marriage, affairs.haskids)
+println("ct_all_abs: \n $ct_all_abs\n")
+
+ct_all_rel = proptable(affairs.marriage, affairs.haskids)
+println("ct_all_rel: \n $ct_all_rel\n")
+
+#share within "marriage (i.e. within a row):
+ct_row = proptable(affairs.marriage, affairs.haskids, margins=1)
+println("ct_row: \n $ct_row\n")
+
+#share within "haskids" (i.e. within a column):
+ct_col = proptable(affairs.marriage, affairs.haskids, margins=2)
+println("ct_col: \n $ct_col\n")
+
+using Plots
+using StatsPlots
+#counts for all graphs:
+counts_m = sort(freqtable(affairs.marriage), rev=true)
+levels_counts_m = String.(collect(keys(counts_m.dicts[1])))
+colors_m = [:grey60, :grey50, :grey40, :grey30, :grey20]
+
+ct_all_abs = freqtable(affairs.marriage, affairs.haskids)
+levels_counts_all = String.(collect(keys(ct_all_abs.dicts[1])))
+colors_all = [:grey80 :grey50]
+
+# pie chart (a):
+pie(levels_counts_m, counts_m, color =:grey, legend=false)
+savefig("JLGraphs/Descr-pie.pdf")
+
+#bar chart (b):
+bar(levels_counts_m, counts_m, color=:grey, legend=false)
+savefig("JLGraphs/Descr-bar.pdf")
+
+#stacked bar plot (can:
+groupedbar(ct_all_abs, bar_position=:stack, color = colors_all, label=["np" "yes"])
+xticks!(1:5, levels_counts_all)
+savefig("JLGraphs/Descr-Bar2.pdf")
+
+#grouped bar plot (d):
+groupedbar(ct_all_abs, bar_position=:dodge,
+color_colors_all, label = ["no" "yes"])
+xticks!(1:5, levels_counts_all)
+savefig("J;Graphs/Descr-Bar3.pdf")
+
+#---------------------------------------------------------------#
+#1.5.2 Continuous Distributions: Histogram and Density
