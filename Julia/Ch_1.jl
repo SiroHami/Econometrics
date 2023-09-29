@@ -746,3 +746,228 @@ savefig("J;Graphs/Descr-Bar3.pdf")
 
 #---------------------------------------------------------------#
 #1.5.2 Continuous Distributions: Histogram and Density
+using WooldridgeDatasets, Plots, DataFrames
+
+ceosall = DataFrame(wooldridge("ceosal1"))
+
+#extract roe:
+roe = ceosall.roe
+
+#histogram with counts (a) :
+histogram(roe, clor=:grey, legned=false)
+ylabel!("Counts")
+xlabel!("roe")
+savefig("JLGraphs/Descr-hist.pdf")
+
+#histogram with density and explicit breaks (b):
+breaks = [0, 5, 10, 20, 30, 60]
+histogram(roe, color=:grey, bins=breaks, normalize=true, legend=false)
+xlabel!("roe")
+ylabel!("Density")
+savefig("JLGraphs/Descr-hist2.pdf")
+
+
+#KDensity.jl
+using KernelDensity
+
+#estimate kernel density:
+kde_est = KernelDensity.kde(roe)
+
+#kernel density (a):
+plot(kde_est.x, kde_est.density, color=:black, linewidth=2, legend=false)
+ylabel!("density")
+xlabel!("roe")
+savefig("JLGraphs/Descr-kde.pdf")
+
+#kernel density with overlayed histogram (b):
+histogram(roe, color=:grey, normalize=true, legend=false)
+plot!(kde_est.x, kde_est.density, color=:black, linewidth=2)
+ylabel!("density")
+xlabel!("roe")
+savefig("JLGraphs/Descr-kde2.pdf")
+
+#---------------------------------------------------------------#
+#1.5.3 Empirical Cumulative Distribution Function (ECDF)
+#The ECDF is a graph of all values x of a variable against the share of obsevations with a value less than or equal to x.
+#A straightforward way to plot the ECDF for our ROE variable is shown in following code.
+#Here, the argument  linetype=:strppre  implements a step function.
+
+ceosall = DataFrame(wooldridge("ceosal1"))
+
+#extract roe:
+roe = ceosall.roe
+
+#calculate ECDF:
+x = sort(roe)
+n = length(x)
+y = range(start=1, stop=n) / n
+
+#plot a step function:
+plot(x, y, linetype=:steppre, color=:black, legned=false)
+xlabel!("roe")
+savefig("JLGraphs/Descr-ecdf.pdf")
+
+#---------------------------------------------------------------#
+#1.5.4 Funcdamental Statistics
+#mean(x): Sample average
+#median(x): Sample median
+#var(x): Sameple variance
+#std(x): Sample standard deviation
+#cov(x,y): Sample covariance
+#cor(x,y): Sample correlation
+#quantile(x, q): q qunatile=100Q percentile, e.g quantile(x, 0.5)=sample median
+
+
+#Descr-Stats.jl
+using WooldridgeDatasets, DataFrames ,Statistics
+
+ceosal1 = DataFrame(wooldridge("ceosal1"))
+
+#extract roe and salary:
+roe = ceosal1.roe
+salary = ceosal1.salary
+
+#sample average:
+roe_mean = mean(roe)
+println("roe_mean: $roe_mean\n")
+
+#sample median:
+roe_median = median(roe)
+println("roe_median: $roe_median\n")
+
+#corrected standard deviation (n-1 scaling):
+roe_std = std(roe)
+println("roe_std: $roe_std\n")
+
+#correlation with roe:
+roe_corr = cor(roe, salary)
+println("roe_corr: $roe_corr\n")
+
+#correlation matrix with roe:
+roe_corr_mat = cor(hcat(roe, salary))
+println("roe_corr_mat: \n$roe_corr_mat\n")
+
+#Descr-Boxplot.jl
+using WooldridgeDatasets, DataFrames, Statistics
+
+ceosal1 = DataFrame(wooldridge("ceosal1"))
+
+#extract roe and salary:
+roe = ceosal1.roe
+salary = ceosal1.salary
+
+#sample average:
+roe_mean = mean(roe)
+println("roe_mean: $roe_mean\n")
+
+#sample median:
+roe_med = median(roe)
+println("roe_med: $roe_med\n")
+
+#corrected standard deviation (n-1 scaling):
+roe_std = std(roe)
+println("roe_std: $roe_std\n")
+
+#correlation with roe:
+roe_corr = cor(roe, salary)
+println("roe_corr: $roe_corr\n")
+
+#correlation matrix with roe:
+roe_corr_mat = cor(hcat(roe, salary))
+println("roe_corr_mat: \n$roe_corr_mat\n")
+
+
+#Descr-Boxplot.jl
+using WooldridgeDatasets, DataFrames, StatsPlots
+
+ceosal1 = DataFrame(wooldridge("ceosal1"))
+
+#extract roe and salary:
+roe = ceosal1.roe
+consprod = ceosal1.consprod
+
+#plotting descriptive statistics:
+boxplot(roe, orientation=:h, linecolor=:black, color=:white, legend=false)
+yticks!([1], [""])
+ylabel!("roe")
+savefig("JLGraphs/Descr-boxplot.pdf")
+
+#plotting descriptive statistics (logical indexing):
+roe_cp0 = roe[consprod.==0]
+roe_cp1 = roe[consprod.==1]
+boxplot([roe_cp0, roe_cp1], liencolor=:black, color=:white, legend=false)
+xticks!([1, 2], ["consprod=0", "consprod=1"])
+ylabel!("roe")
+savefig("JLGraphs/Descr-boxplot2.pdf")
+
+#---------------------------------------------------------------#
+#1.6 Probability Distributions
+#Appendix B of Wooldridge (2019)
+#The commands for evaluationg the proba bility density functtion (PDF) for continusous,
+#the probability mass function (PMF) for discrete, and the cumulative distiribution function (CDF) as well as quantile function (inverse CDF)
+# for the most relevant distribution are shown inn above markdown. The function are available after executing using Distrubutions
+
+using Distributions
+
+#Distribution 
+#Parameters Combine code with 
+#PMF/PDF: pdf(..., x)
+#CDF: cdf(..., x)
+#Quantile: quantile(..., p)
+
+#Discrete distribution:
+#Bernoulli(p): Bernoulli distribution with success probability p
+#Binomial(n, p): Binomial distribution with n trials and success probability p
+#Hypergeometric(s, f, n): Hypergeometric distribution with s successes, f failures, and n trials
+#Poisson(lambda): Poisson distribution with mean lambda
+#Geometric(p): Geometric distribution with success probability p
+
+#Continuous distribution:
+#Uniform(a, b): Uniform distribution on the interval [a, b]
+#Logistic(mu, theta): Logistic distribution with mean mu and scale theta
+#Exponential(1 / lambda): Exponential distribution with mean 1 / lambda
+#Normal(): Standard normal distribution
+#Normal(mu, sigma): Normal distribution with mean mu and standard deviation sigma
+#LogNormal(mu, sigma): Log-normal distribution with mean mu and standard deviation sigma
+#Chisq(n): Chi-squared distribution with n degrees of freedom
+#TDist(n): Student's t-distribution with n degrees of freedom
+#FDist(m, n): F-distribution with m and n degrees of freedom
+
+#---------------------------------------------------------------#
+#1.6.1 Discrete Distributions
+#The PMF f(x) = P(X=x) gives the probability that a random variable X with this distribution takes tyhe given value x.
+#For most important of those distributions(Bernoulli, Binomial, Hypergeometic, Poission and Geometirc)
+
+#PMF-binom.jl
+using Distributions
+
+#pedestrian approach:
+p1 = binomial(10, 2) * (0.2^2) * (0.8*8)
+println("p1: $p1\n")
+
+#package function:
+p2 = pdf(Binomial(10, 0.2), 2)
+println("p2: $p2\n")
+
+
+#PMF-example.jl
+using Distributions, DataFrames, Plots
+
+#PMF for all values between 0 and 10:
+x = 0:10
+fx = pdf.(Binomial(10, 0.2), x)
+
+#collect values in DataFrame:
+result = DataFrame(x=x, fx=fx)
+println("result: \n$result\n")
+
+# plot:
+bar(x, fx, color=:grey, alpha=0.6, legend=false)
+xlabel!("x")
+ylabel!("f(x)")
+savefig("JLGraphs/Prob-PMF.pdf")
+
+#---------------------------------------------------------------#
+#1.6.2 Continuous Distributions
+
+#support of normal density:
