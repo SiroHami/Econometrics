@@ -969,5 +969,191 @@ savefig("JLGraphs/Prob-PMF.pdf")
 
 #---------------------------------------------------------------#
 #1.6.2 Continuous Distributions
+# uniform, logistic, exponential, normal, t, chi, F``
 
+using Plots, Distributions
 #support of normal density:
+x_range = range(-4, 4, length=100)
+
+# PDF for all these values:
+pdf_normal = pdf.(Normal(), x_range)
+
+# plot:
+plot(x_range, pdf_normal, color=:black, legend=false)
+xlabel!("x")
+ylabel!("dx")
+savefig("JLGraphs/Prob-PDF.pdf")
+
+#---------------------------------------------------------------#
+#1.6.3 Cumulative Distribution Function (CDF)
+#For all distribution, the CDF F(x) = P(X<=x) represents the probability that the random variable X takes a value of at most x.
+#The probability that X is between two values a and b is P(a < X <= b) = F(b) = F(a)
+#We can directly use the Distributions functions in Table 1.6 in combination with the function cdf to these calculations as demonstrated in code
+
+#CDF-example.jl
+using Distributions
+#binonmial CDF:
+p1 = cdf(Binomial(10, 0.2), 3)
+println("p1: $p1\n")
+
+#normal CDF:
+p2 = cdf(Normal(), 1.96) - cdf(Normal(), -1.96)
+println("p2: $p2\n")
+
+#B.6 Probability for a Normal Random Variable
+using Distributions
+
+#first example using the transformation:
+p1_1 = cdf(Normal(), 2 / 3) - cdf(Normal(), -2 / 3)
+println("p1_1: $p1_1\n")
+
+#first example working directly with the distribution of X:
+p1_2 = cdf(Normal(4, 3), 6) - cdf(Normal(4, 3), 2)
+println("p1_2: $p1_2\n")
+
+#second example:
+p2 = 1 - cdf(Normal(4,3), 2) + cdf(Normal(4, 3), -2)
+println("p2: $p2\n")
+
+#CDF-figure.jl
+#binomial CDF:
+x_binom = range(-1, 10, length=100)
+cdf_binom = cdf.(Binomial(10, 0.2), x_binom)
+
+plot(x_binom, cdf_binom, linetytpe=:steppre, color=:black, legend=false)
+xlabel!("x")
+ylabel!("F(x)")
+savefig("JLGraphs/Prob-CDF.pdf")
+
+#normal CDF:
+x_norm = range(-4, 4, length=1000)
+cdf_norm = cdf.(Normal(), x_norm)
+
+plot(x_norm, cdf_norm, color=:black, legend=false)
+xlabel!("x")
+ylabel!("F(x)")
+savefig("JLGraphs/Prob-CDF2.pdf")
+
+
+#Qunatile
+#The q-quantile x(q) of a random variable is the value for which the probability to xample a value
+#x <= x[q] is just q. 
+#These values are important for example for calculating critical values of test statistics
+
+q_975 = quantile(Normal(), 0.975)
+println("q_975: $q_975\n")
+
+#---------------------------------------------------------------#
+#1.6.4 Random Draws from Probability Distributions
+using Distributions
+
+#smaple-Bernoulli.jl
+sample = rand(Bernoulli(0.5), 10)
+println("sample: $sample\n")
+
+#Sample-Norm.jl
+sample = rand(Normal(), 6)
+sample_rounded = round.(sample, digits=5)
+println("sample_rounded: $sample_rounded\n")
+
+#Random-Number.jl
+using Distributions, Random
+
+Random.seed!(12345)
+#sample from a standard normal RV with sample size n=3:
+sample1 = rand(Normal(), 3)
+println("sample1: $sample1\n")
+
+#a different sample from the same distribution:
+sample2 = rand(Normal(), 3)
+println("sample2: $sample2\n")
+
+#set the seed of the random number generator and take two samples:
+Random.seed!(54321)
+sample3 = rand(Normal(), 3)
+println("sample3: $sample3\n")
+
+sample4 = rand(Normal(), 3)
+println("sample4: $sample4\n")
+
+#reset the seeed to the same value to get the same samples again:
+Random.seed!(54321)
+sample5 = rand(Normal(), 3)
+println("sample5: $sample5\n")
+
+sample6 = rand(Normal(), 3)
+println("sample6: $sample6\n")
+
+
+#---------------------------------------------------------------#
+#---------------------------------------------------------------#
+#1.7 Confidence Intervals and Statistical Inference
+
+#---------------------------------------------------------------#
+#1.7.1 Confidecnce Intervals
+# Confidence intervals are introduced in Wooldridege Appencix C.5
+# Thy are constructed clearly: For 95% of all samples,
+#the implied CI includes th populatyion Parameters
+
+
+#Example-C-2.jl
+using Distributions
+
+#manually enter raw data from Wooldridge Table C.3
+SR87 = [10, 1, 6, 0.45, 1.25, 1.3, 1.06, 3, 8.18, 1.67,
+0.97, 1, 0.45, 5.03, 8, 9, 18, 0.28, 7, 3.97]
+SR88 = [3, 1, 5, 0.5, 1.54, 1.5, 0.8, 2, 0.67, 1.17, 0.51, 
+0.5, 0.61, 6.7, 4, 7, 19, 0.2, 5, 3.83]
+
+# calcualte change:
+Change = SR88 .- SR87
+
+#ingredients to CI formula:
+avgCH = mean(Change)
+println("avgCH: $avgCH\n")
+
+n = length(Change)
+sdCH = std(Change)
+se = sdCH / sqrt(n)
+println("se: $se\n")
+
+c = quantile(TDist(n-1), 0.975)
+println("c: $c\n")
+
+#confidence interval:
+lowerCI = avgCH - c * se
+println("lowerCI: $lowerCI\n")
+upperCI = avgCH + c * se
+println("upperCI: $upperCI\n")
+
+
+#Exampel-C-3.jl
+using Distributions, DataFrames, WooldridgeDatasets
+
+audit = DataFrame(wooldridge("audit"))
+y = audit.y
+
+#ingredients to CI formula:
+argy = mean(y)
+n = length(y)
+sdy = std(y)
+se = sdy / sqrt(n)
+c95 = quantile(Normal(), 0.975)
+c99 = quantile(Normal(), 0.995)
+
+#95% confidence interval:
+lowerCI95 = argy - c95 * se
+println("lowerCI95: $lowerCI95\n")
+
+upperCI95 = argy + c95 * se
+println("upperCI95: $upperCI95\n")
+
+#99% confidence interval:
+lowerCI99 = argy - c99 * se
+println("lowerCI99: $lowerCI99\n")
+
+upperCI99 = argy + c99 * se
+println("upperCI99: $upperCI99\n")
+
+#---------------------------------------------------------------#
+#1.7.2 t Tests
